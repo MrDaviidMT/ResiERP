@@ -21,7 +21,7 @@ runs:
       with:
         php-version: ${{ inputs.php-version }}
         # Las mismas extensiones que instala el Dockerfile, más pdo_sqlite para los tests en memoria
-        extensions: pdo_mysql, pdo_sqlite, bcmath, gd, zip, intl
+        extensions: pdo_mysql, pdo_sqlite, intl
         coverage: none
 
     - name: Localizar la caché de Composer
