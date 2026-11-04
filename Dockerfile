@@ -32,7 +32,7 @@ ADD --checksum=sha256:3c3f3de26458405199f1f3a4c7130fdd2056daf596c05512badd769a77
 # Mismo motivo que en la imagen de nginx: la base traía curl/libcurl con un HIGH ya parcheado
 RUN apk upgrade --no-cache && \
     chmod +x /usr/local/bin/install-php-extensions && \
-    install-php-extensions pdo_mysql bcmath gd zip intl redis && \
+    install-php-extensions pdo_mysql intl && \
     rm /usr/local/bin/install-php-extensions
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
@@ -47,8 +47,7 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction && \
 
 # Permisos en la imagen (hallazgo S9): el contenedor no necesita arrancar como root para hacer chown
 RUN chown -R www-data:www-data storage bootstrap/cache && \
-    chmod -R 775 storage bootstrap/cache && \
-    php artisan storage:link
+    chmod -R 775 storage bootstrap/cache
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
