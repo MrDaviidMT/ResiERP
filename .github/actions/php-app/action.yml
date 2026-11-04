@@ -1,0 +1,44 @@
+# Acción compuesta: el montaje de PHP que necesitan tres jobs (estilo y los dos de tests).
+# Está aquí para no repetir los mismos cinco pasos tres veces; se usa con `uses: ./.github/actions/php-app`
+# y exige haber hecho checkout antes (es código del propio repositorio).
+name: Entorno PHP de ResiERP
+description: Instala PHP con las extensiones del proyecto y las dependencias de Composer, con caché.
+
+inputs:
+  php-version:
+    description: Versión de PHP que se instala en el runner.
+    required: false
+    default: '8.4'
+
+runs:
+  using: composite
+  steps:
+    # Las acciones de terceros se fijan por SHA, no por etiqueta: una etiqueta se puede mover
+    # a otro commit y ejecutaríamos código distinto sin cambiar nada (mismo criterio que el
+    # hallazgo S5 con las imágenes de Docker). El comentario dice a qué versión corresponde.
+    - name: Instalar PHP
+      uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+      with:
+        php-version: ${{ inputs.php-version }}
+        # Las mismas extensiones que instala el Dockerfile, más pdo_sqlite para los tests en memoria
+        extensions: pdo_mysql, pdo_sqlite, bcmath, gd, zip, intl
+        coverage: none
+
+    - name: Localizar la caché de Composer
+      id: composer-cache
+      shell: bash
+      run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+    # La caché se indexa por composer.lock: si no cambian las dependencias, no se vuelven a descargar
+    - name: Restaurar la caché de Composer
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: composer-php${{ inputs.php-version }}-${{ hashFiles('composer.lock') }}
+        restore-keys: composer-php${{ inputs.php-version }}-
+
+    # Con dependencias de desarrollo: hacen falta PHPUnit y Pint. --prefer-dist usa los zip
+    # del repositorio de paquetes en lugar de clonar cada uno con git.
+    - name: Instalar dependencias de PHP
+      shell: bash
+      run: composer install --no-interaction --no-progress --prefer-dist

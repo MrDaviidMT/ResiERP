@@ -1,0 +1,37 @@
+# Lista de permitidos: se excluye todo y solo entra en la imagen lo que la aplicación necesita.
+# Así, cualquier archivo nuevo (notas, volcados, .env.*) queda fuera por defecto.
+*
+
+!app/
+!bootstrap/
+!config/
+!database/
+!lang/
+!public/
+!resources/
+!routes/
+!storage/
+!artisan
+!composer.json
+!composer.lock
+!package.json
+!package-lock.json
+!.npmrc
+!vite.config.js
+!docker/entrypoint.sh
+!docker/php.ini
+!docker/nginx.conf
+
+# Dentro de lo permitido, nada generado en local
+bootstrap/cache/*.php
+public/build
+public/hot
+public/storage
+storage/logs/*
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/framework/testing
+storage/app/private/*
+storage/app/public/*
+!storage/**/.gitignore

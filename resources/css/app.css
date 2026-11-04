@@ -1,0 +1,704 @@
+@import "tailwindcss";
+@import "flatpickr/dist/flatpickr.min.css";
+
+/* ===========================================================================
+   1. TOKENS
+   Una sola fuente de verdad. Al declararlos en @theme, Tailwind genera además
+   las utilidades correspondientes (bg-marca-600, text-tinta, border-linea...),
+   así que las vistas y este fichero hablan siempre de los mismos colores.
+
+   La paleta no es la de fábrica de Tailwind a propósito: su azul y su gris
+   frío son los que delatan una plantilla. Marca: verde petróleo, sobrio y
+   cercano al ámbito sanitario sin caer en el azul de hospital. Neutros
+   cálidos, que sientan mejor junto a un verde que los grises azulados.
+
+   Todos los contrastes están comprobados contra WCAG 2.2 (AA pide 4.5:1 para
+   texto y 3:1 para elementos no textuales; se apunta a AAA donde sale gratis):
+     tinta sobre fondo .......... 13.35  AAA
+     tinta-suave sobre blanco .... 6.72  AA
+     blanco sobre marca-600 ...... 6.11  AA
+     marca-700 sobre blanco ...... 8.25  AAA
+     peligro / aviso / exito ..... 6.54 / 5.93 / 6.54  AA
+   =========================================================================== */
+@theme {
+    /* Tipografía fluida. Tailwind v4 genera text-xs, text-sm... a partir de estas variables,
+       así que redefinirlas aquí convierte en fluidas las más de 4.000 utilidades que ya
+       usan las vistas, sin tocar ninguna.
+
+       clamp(mínimo, preferido, máximo): el valor crece con el ancho de la ventana entre dos
+       topes. Así no hay tamaños fijos: en un portátil pequeño se lee cómodo y en un monitor
+       grande sigue creciendo en lugar de quedarse corto, que es el problema de fijar px.
+       El tope se alcanza alrededor de 2000 px de ancho. Todo en rem, de modo que también
+       respeta el tamaño de letra que el usuario tenga configurado en el navegador.
+
+       El mínimo sube: el cuerpo pasa de 14 px fijos a 15-19 px según la pantalla. */
+    --text-xs: clamp(0.75rem, 0.72rem + 0.12vw, 0.875rem);
+    --text-sm: clamp(0.875rem, 0.83rem + 0.18vw, 1.0625rem);
+    --text-base: clamp(0.9375rem, 0.88rem + 0.25vw, 1.1875rem);
+    --text-lg: clamp(1.0625rem, 0.97rem + 0.4vw, 1.375rem);
+    --text-xl: clamp(1.1875rem, 1.05rem + 0.55vw, 1.625rem);
+    --text-2xl: clamp(1.375rem, 1.2rem + 0.75vw, 2rem);
+    --text-3xl: clamp(1.625rem, 1.35rem + 1.1vw, 2.5rem);
+
+    --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+    /* Marca */
+    --color-marca-50: #f2f8f8;
+    --color-marca-100: #ddeeee;
+    --color-marca-200: #bcdcdc;
+    --color-marca-300: #90c2c2;
+    --color-marca-400: #5fa3a4;
+    --color-marca-500: #3d8487;  /* 4.33:1 — decorativo, nunca para texto */
+    --color-marca-600: #2b6b6f;  /* acciones principales */
+    --color-marca-700: #22565a;  /* enlaces y estados :hover */
+    --color-marca-800: #1c4548;
+    --color-marca-900: #16373a;
+
+    /* Neutros cálidos */
+    --color-fondo: #f4f3f1;      /* fondo de página: claro pero no blanco */
+    --color-superficie: #ffffff; /* tarjetas y tablas */
+    --color-linea: #ddd9d4;      /* separadores */
+    --color-linea-fuerte: #b0aca7;
+    --color-tinta: #2b2724;      /* texto principal */
+    --color-tinta-suave: #605b55; /* texto secundario y metadatos */
+    --color-tinta-tenue: #85807a;  /* 3.6:1 — iconos y adornos, nunca texto */
+
+    /* Semánticos: el color acompaña al texto, nunca lo sustituye (NHS: no
+       transmitir significado solo con color) */
+    --color-peligro: #b3261e;
+    --color-peligro-suave: #fdf2f1;
+    --color-aviso: #8a5a00;
+    --color-aviso-suave: #fdf6e8;
+    --color-exito: #1b6b3a;
+    --color-exito-suave: #eef7f1;
+}
+
+:root {
+    --radio: 0.375rem;        /* 6px: contenido, no decoración */
+    --radio-chico: 0.25rem;
+    --linea: 1px solid var(--color-linea);
+    --fila: 2.5rem;           /* 40px, la altura "md" de Carbon para tablas de datos */
+
+    /* Altura de TODO lo que se pulsa o se rellena: botones, acciones de fila y campos.
+       Una sola medida es lo que garantiza que un botón junto a otro, o junto a un campo,
+       quede alineado sin compensar nada en cada vista. WCAG 2.2 pide 24 px (2.5.8) y 44 px
+       para AAA (2.5.5): con ratón crece de 36 a 44 con la pantalla, y con dedo son 44 fijos. */
+    --control: clamp(2.25rem, 2.1rem + 0.35vw, 2.75rem);
+    --icono: clamp(1rem, 0.95rem + 0.2vw, 1.25rem);
+}
+
+@media (pointer: coarse) {
+    :root { --control: 2.75rem; }
+}
+
+/* ===========================================================================
+   2. ELEMENTOS
+   Lo que vale para todo un elemento se define sobre el elemento, no repitiendo
+   clases en cada vista.
+   =========================================================================== */
+@layer base {
+    body {
+        background-color: var(--color-fondo);
+        color: var(--color-tinta);
+    }
+
+    /* Un solo anillo de foco para toda la aplicación, visible solo con teclado.
+       :focus-visible evita el halo al hacer clic con el ratón. */
+    :focus-visible {
+        outline: 2px solid var(--color-marca-600);
+        outline-offset: 2px;
+        border-radius: var(--radio-chico);
+    }
+
+    /* Cifras alineadas en columna: todos los dígitos ocupan lo mismo */
+    th, td, time, output {
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+/* ===========================================================================
+   3. COMPONENTES
+   Todo vive en esta capa, también las tablas: una regla fuera de capa gana a
+   cualquiera de dentro sin importar su especificidad. Eso anulaba en silencio
+   el resaltado de fila de las tablas, porque el fondo de la tarjeta estaba
+   fuera de capa. Con una sola capa manda la especificidad y nada se pisa.
+   =========================================================================== */
+@layer components {
+
+    /* --- Tonos -----------------------------------------------------------
+       Un tono es un trío de colores, sin forma. La forma la pone .boton,
+       .accion, .etiqueta o .aviso. Así "peligro" es exactamente el mismo rojo
+       en un botón, en un icono de fila y en una etiqueta: no hay un rojo por
+       cada componente que pueda divergir. */
+    .tono-neutro {
+        --tono-fondo: var(--color-fondo);
+        --tono-texto: var(--color-tinta-suave);
+        --tono-hover: var(--color-linea);
+        --borde-control: var(--color-linea);  /* su fondo es el de la página: sin borde se perdería */
+    }
+    .tono-marca {
+        --tono-fondo: var(--color-marca-50);
+        --tono-texto: var(--color-marca-700);
+        --tono-hover: var(--color-marca-100);
+    }
+    .tono-peligro {
+        --tono-fondo: var(--color-peligro-suave);
+        --tono-texto: var(--color-peligro);
+        --tono-hover: #fbe3e1;
+    }
+    .tono-aviso {
+        --tono-fondo: var(--color-aviso-suave);
+        --tono-texto: var(--color-aviso);
+        --tono-hover: #f9ecd2;
+    }
+    .tono-exito {
+        --tono-fondo: var(--color-exito-suave);
+        --tono-texto: var(--color-exito);
+        --tono-hover: #ddeee4;
+    }
+
+    /* --- Estructura ------------------------------------------------------ */
+    /* 108rem (~1730 px) en lugar de 80rem: en un monitor grande se aprovecha el ancho en
+       vez de dejar dos franjas vacías. Los formularios y las fichas de lectura van en la
+       variante estrecha, porque una línea de texto muy larga se lee mal. */
+    .contenedor {
+        max-width: var(--contenedor, 108rem);
+        margin-inline: auto;
+        padding-block: clamp(1rem, 1.5vw, 2rem);
+        padding-inline: clamp(1rem, 2vw, 2.5rem);
+    }
+    .contenedor--estrecho { --contenedor: 56rem; }
+
+    /* Barra superior: fija arriba en todas las páginas, por eso está en el layout */
+    .barra-superior {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        min-height: 4rem;
+        padding-inline: clamp(1rem, 2vw, 2.5rem);
+        background-color: var(--color-superficie);
+        border-bottom: var(--linea);
+    }
+
+    .enlace-volver {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: var(--text-sm);
+        font-weight: 500;
+        color: var(--color-tinta-suave);
+    }
+    .enlace-volver:hover { color: var(--color-tinta); }
+    .enlace-volver svg { width: var(--icono); height: var(--icono); flex-shrink: 0; }
+
+    /* Cabecera de página: título a la izquierda y sus acciones a la derecha. Al faltar
+       sitio las acciones bajan a la línea siguiente, nunca se ocultan. */
+    .cabecera-pagina {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .titulo-pagina {
+        font-size: var(--text-2xl);
+        font-weight: 600;
+        color: var(--color-tinta);
+    }
+    .titulo-seccion {
+        font-size: var(--text-lg);
+        font-weight: 600;
+        color: var(--color-tinta);
+    }
+
+    .tarjeta {
+        background-color: var(--color-superficie);
+        border: var(--linea);
+        border-radius: var(--radio);
+    }
+
+    /* Pares dato/valor de una ficha */
+    .datos {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+        gap: 1rem 1.5rem;
+        font-size: var(--text-sm);
+    }
+    .datos dt {
+        font-size: var(--text-xs);
+        color: var(--color-tinta-suave);
+    }
+    .datos dd { font-weight: 500; }
+
+    /* Panel de filtros de un listado */
+    .filtros {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background-color: var(--color-fondo);
+        border: var(--linea);
+        border-radius: var(--radio);
+    }
+
+    /* Ventana modal */
+    .modal-fondo {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgb(0 0 0 / 0.5);
+    }
+    .modal {
+        width: min(32rem, calc(100% - 2rem));
+        max-height: 90vh;
+        padding: 1.5rem;
+        overflow-y: auto;
+        background-color: var(--color-superficie);
+        border: var(--linea);
+        border-radius: var(--radio);
+        box-shadow: 0 20px 40px rgb(0 0 0 / 0.2);
+    }
+
+    /* --- Pestañas --------------------------------------------------------
+       Navegar no es actuar: las secciones de un residente son pestañas y sus
+       acciones, botones. Como en la navegación lateral, el estado activo sale
+       de aria-current o aria-selected: lo anuncia también el lector de pantalla. */
+    .pestanas {
+        display: flex;
+        overflow-x: auto;
+        border-bottom: var(--linea);
+    }
+    .pestana {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-height: var(--control);
+        padding-inline: 1rem;
+        border-bottom: 3px solid transparent;
+        border-radius: var(--radio) var(--radio) 0 0;
+        margin-bottom: -1px;
+        font-size: var(--text-sm);
+        font-weight: 500;
+        white-space: nowrap;
+        color: var(--color-tinta-suave);
+        cursor: pointer;
+        transition: background-color 120ms, color 120ms, border-color 120ms;
+    }
+    .pestana svg { width: var(--icono); height: var(--icono); flex-shrink: 0; }
+    /* El fondo se mezcla con transparente para que funcione igual sobre el gris de la página
+       (pestañas del residente) y sobre el blanco de la tarjeta (apartados del historial). La
+       activa no cambia de grosor de letra: ensancharía el texto y movería las pestañas vecinas. */
+    .pestana:hover {
+        background-color: color-mix(in srgb, var(--color-marca-600) 7%, transparent);
+        color: var(--color-tinta);
+        border-bottom-color: var(--color-linea-fuerte);
+    }
+    .pestana:is([aria-current="page"], [aria-selected="true"]) {
+        background-color: color-mix(in srgb, var(--color-marca-600) 12%, transparent);
+        color: var(--color-marca-800);
+        border-bottom-color: var(--color-marca-600);
+    }
+
+    /* --- Botones y acciones de fila ---------------------------------------
+       Las dos formas de lo mismo: .boton lleva texto y .accion es solo icono
+       (dentro de una tabla). Comparten altura y tono, así que una acción tiene
+       el mismo aspecto esté donde esté.
+
+       Criterio de color, siempre el mismo:
+         - tono-marca   editar y acciones de contenido
+         - tono-peligro anular, dar de baja, eliminar
+         - tono-aviso   interrumpir algo en curso (salida, mantenimiento, retirar)
+         - tono-exito   confirmar o cerrar un asunto (entrada, resolver, reactivar)
+         - tono-neutro  ver, cancelar, volver, imprimir, filtros
+       El relleno sólido (.boton-primario) es solo para la acción principal de
+       la pantalla: como máximo una, según el criterio de Primer. */
+    .boton,
+    .accion {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: var(--control);
+        border: 1px solid var(--borde-control, transparent);
+        border-radius: var(--radio);
+        background-color: var(--tono-fondo);
+        color: var(--tono-texto);
+        cursor: pointer;
+        transition: background-color 120ms, color 120ms;
+    }
+    :is(.boton, .accion):hover:not(:disabled) { background-color: var(--tono-hover); }
+    :is(.boton, .accion):disabled,
+    :is(.boton, .accion)[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
+    :is(.boton, .accion) svg { width: var(--icono); height: var(--icono); flex-shrink: 0; }
+
+    .boton {
+        gap: 0.5rem;
+        padding-inline: 0.875rem;
+        font-size: var(--text-sm);
+        font-weight: 500;
+        white-space: nowrap;
+    }
+    .accion {
+        min-width: var(--control);
+        padding: 0.375rem;
+    }
+
+    /* Flecha de volver arriba: flotante y siempre en la misma esquina. El margen es fluido y
+       el tamaño, el de cualquier control. */
+    .boton-subir {
+        position: fixed;
+        inset-block-end: clamp(1rem, 2vw, 2rem);
+        inset-inline-end: clamp(1rem, 2vw, 2rem);
+        z-index: 30;
+        width: var(--control);
+        padding: 0;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 0.25);
+    }
+
+    .boton-primario {
+        --tono-fondo: var(--color-marca-600);
+        --tono-texto: #fff;
+        --tono-hover: var(--color-marca-700);
+    }
+
+    /* Grupo de botones: la separación es del componente, no de cada vista. Dentro de una
+       tabla, envolver lo decide la tabla (ver "Tablas de datos"). */
+    .grupo-acciones {
+        display: flex;
+        flex-wrap: var(--t-acciones-envolver, wrap);
+        align-items: center;
+        justify-content: var(--t-acciones-justificar, flex-start);
+        gap: 0.5rem;
+    }
+    .grupo-acciones--final { --t-acciones-justificar: flex-end; }
+
+    .paginacion {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+    .paginacion .accion { font-size: var(--text-sm); }
+
+    /* --- Navegación lateral ----------------------------------------------
+       El estado activo se marca con aria-current="page", no con una clase. */
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.625rem 1rem;
+        border-radius: var(--radio);
+        font-size: var(--text-sm);
+        font-weight: 500;
+        color: var(--color-marca-100);
+        transition: background-color 120ms, color 120ms;
+    }
+    .nav-item svg { width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
+    .nav-item:hover { background-color: var(--color-marca-800); color: #fff; }
+    .nav-item[aria-current="page"] { background-color: var(--color-marca-700); color: #fff; }
+
+    /* --- Formularios ----------------------------------------------------- */
+    .campo {
+        display: block;
+        width: 100%;
+        min-height: var(--control);
+        padding: 0.5rem 0.625rem;
+        background-color: var(--color-superficie);
+        border: 1px solid var(--color-linea-fuerte);
+        border-radius: var(--radio);
+        font-size: var(--text-sm);
+        color: var(--color-tinta);
+    }
+    .campo::placeholder { color: var(--color-tinta-suave); }
+    .campo:hover:not(:disabled) { border-color: var(--color-tinta-suave); }
+    .campo:disabled { background-color: var(--color-fondo); color: var(--color-tinta-suave); cursor: not-allowed; }
+    /* Un campo con error se marca con borde y con texto, no solo con color */
+    .campo[aria-invalid="true"] { border-color: var(--color-peligro); }
+
+    /* Sin display ni margen: los pone la vista donde corresponda (unas son
+       <label> de bloque, otras cabeceras en línea dentro de una fila flex) */
+    .etiqueta-campo {
+        font-size: var(--text-xs);
+        font-weight: 600;
+        line-height: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--color-tinta-suave);
+    }
+
+    /* --- Etiquetas de estado --------------------------------------------- */
+    .etiqueta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.125rem 0.5rem;
+        /* Un borde del propio color del texto les da definición sobre blanco */
+        border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+        border-radius: 999px;
+        background-color: var(--tono-fondo);
+        color: var(--tono-texto);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* Un rol es una categoría, no un estado, por eso tiene sus propios colores y no usa
+       los tonos semánticos: "peligro" en un rol diría algo que no es. Todas las parejas
+       superan AA (4.5:1). La clase la pone x-etiqueta-rol a partir del enum Role. */
+    .rol-superadmin { --tono-fondo: var(--color-tinta); --tono-texto: #fff; }
+    .rol-director { --tono-fondo: #f1edf8; --tono-texto: #5b3a8f; }
+    .rol-enfermero { --tono-fondo: #e8f2fb; --tono-texto: #1f5a8c; }
+    .rol-auxiliar { --tono-fondo: var(--color-marca-100); --tono-texto: var(--color-marca-800); }
+    .rol-recepcionista { --tono-fondo: #fdeef6; --tono-texto: #9c2a68; }
+    .rol-psicologo { --tono-fondo: #eef0fb; --tono-texto: #3f4aa3; }
+    .rol-trabajador_social { --tono-fondo: #f9efe9; --tono-texto: #8f4a1f; }
+    .rol-fisioterapeuta { --tono-fondo: #eaf5e4; --tono-texto: #3f6b1c; }
+    .rol-cocinero { --tono-fondo: #fdf4dc; --tono-texto: #6f5500; }
+    .rol-mantenimiento { --tono-fondo: #e9ecef; --tono-texto: #454f59; }
+
+    /* --- Avisos de la página --------------------------------------------- */
+    .aviso {
+        display: block;
+        margin-bottom: 1rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--color-linea);
+        border-inline-start: 3px solid currentColor;
+        border-radius: var(--radio);
+        background-color: var(--tono-fondo);
+        color: var(--tono-texto);
+        font-size: var(--text-sm);
+    }
+
+    /* Barra de progreso (ocupación). El valor lo pone el servidor en la propiedad
+       --valor: es la única forma de pasar un dato dinámico al CSS sin escribir una
+       regla en línea. */
+    .barra-progreso {
+        width: 100%;
+        height: 0.375rem;
+        border-radius: 999px;
+        background-color: var(--color-fondo);
+        overflow: hidden;
+    }
+    .barra-progreso::after {
+        content: "";
+        display: block;
+        width: var(--valor, 0%);
+        height: 100%;
+        border-radius: inherit;
+        background-color: var(--color-marca-500);
+    }
+
+    /* --- Tablas de datos -------------------------------------------------
+       Medidas de Carbon (cabecera semibold, filas de 40px) y criterio de GOV.UK
+       para cifras. Línea inferior en vez de cuadrícula ni zebra: menos ruido.
+
+       Cada tabla se convierte en tarjetas por debajo de un ancho que depende de
+       sus columnas, y lo declara la vista:
+         (por omisión)   4-5 columnas -> tarjetas por debajo de  768 px
+         .tabla--media   6 columnas   -> tarjetas por debajo de 1024 px
+         .tabla--ancha   7-8 columnas -> tarjetas por debajo de 1280 px
+
+       El modo tarjeta se escribe UNA vez gracias a un "conmutador de espacio":
+       --tarjeta vale `initial` (variable inválida) o vacío. Una variable que
+       dependa de ella, como --t-rejilla, es inválida si está apagado y vale
+       "grid" si está encendido; y var(--t-rejilla, table-row) usa el segundo
+       valor cuando la primera es inválida. Las tres media queries del final solo
+       encienden el conmutador: no repiten ninguna declaración. */
+    .tabla {
+        --tarjeta: initial;
+        --t-bloque: var(--tarjeta) block;
+        --t-oculto: var(--tarjeta) none;
+        --t-rejilla: var(--tarjeta) grid;
+        --t-plantilla: var(--tarjeta) repeat(auto-fit, minmax(11rem, 1fr));
+        --t-hueco: var(--tarjeta) 0.5rem 1.5rem;
+        --t-fila-margen: var(--tarjeta) 0.75rem;
+        --t-fila-relleno: var(--tarjeta) 0.875rem 1rem;
+        --t-fila-borde: var(--tarjeta) var(--linea);
+        --t-fila-radio: var(--tarjeta) var(--radio);
+        --t-celda-relleno: var(--tarjeta) 0.15rem 0;
+        --t-sin-borde: var(--tarjeta) 0;
+        --t-izquierda: var(--tarjeta) left;
+        --t-auto: var(--tarjeta) auto;
+        --t-normal: var(--tarjeta) normal;
+        --t-todo: var(--tarjeta) 1 / -1;
+        --t-titulo-tamano: var(--tarjeta) var(--text-base);
+        --t-titulo-peso: var(--tarjeta) 600;
+        --t-acciones-envolver: var(--tarjeta) wrap;
+        --t-acciones-borde: var(--tarjeta) var(--linea);
+        --t-acciones-relleno: var(--tarjeta) 0.75rem;
+
+        display: var(--t-bloque, table);
+        width: 100%;
+        border-collapse: collapse;
+        font-size: var(--text-sm);
+    }
+
+    .tabla > thead { display: var(--t-oculto, table-header-group); }
+    .tabla > tbody { display: var(--t-bloque, table-row-group); }
+
+    .tabla > thead th {
+        height: var(--fila);
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid var(--color-linea-fuerte);
+        text-align: left;
+        font-size: var(--text-xs);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--color-tinta-suave);
+        white-space: nowrap;
+    }
+
+    .tabla > tbody > tr {
+        display: var(--t-rejilla, table-row);
+        grid-template-columns: var(--t-plantilla, none);
+        gap: var(--t-hueco, 0);
+        margin-bottom: var(--t-fila-margen, 0);
+        padding: var(--t-fila-relleno, 0);
+        border: var(--t-fila-borde, 0);
+        border-radius: var(--t-fila-radio, 0);
+        transition: background-color 120ms;
+    }
+    .tabla > tbody > tr:hover { background-color: var(--color-marca-50); }
+
+    .tabla > tbody > tr > td {
+        display: var(--t-bloque, table-cell);
+        min-width: 0;
+        padding: var(--t-celda-relleno, 0.5rem 0.75rem);
+        border-bottom: var(--t-sin-borde, var(--linea));
+        text-align: left;
+        vertical-align: middle;
+        /* Los textos largos parten dentro de la tarjeta en lugar de desbordarla */
+        overflow-wrap: break-word;
+    }
+    .tabla > tbody > tr:last-child > td { border-bottom: 0; }
+
+    /* Enlace a la ficha: toda la casilla es el enlace, en cualquier tabla. El ::after se
+       estira sobre la celda, relleno incluido y aunque la fila sea más alta que el texto, sin
+       márgenes negativos que habría que ajustar en cada modo (técnica "stretched link"). */
+    .tabla > tbody > tr > td:has(> .enlace-fila) { position: relative; }
+    .enlace-fila {
+        font-weight: 500;
+        color: var(--color-marca-700);
+    }
+    .enlace-fila:hover { color: var(--color-marca-800); text-decoration: underline; }
+    .enlace-fila::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+    }
+
+    /* En tarjeta no hay cabecera que mirar: la etiqueta sale del atributo data-label */
+    .tabla > tbody > tr > td::before {
+        display: var(--t-bloque, none);
+        margin-bottom: 0.1rem;
+        content: attr(data-label);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-tinta-suave);
+    }
+
+    /* En tarjeta, el primer dato hace de título: sin etiqueta, más grande y a todo el ancho */
+    .tabla > tbody > tr > td:first-child {
+        grid-column: var(--t-todo, auto);
+        font-size: var(--t-titulo-tamano, inherit);
+        font-weight: var(--t-titulo-peso, inherit);
+    }
+    .tabla > tbody > tr > td:first-child::before { display: none; }
+
+    /* Cifras a la derecha para compararlas, salvo en tarjeta: ahí las precede su etiqueta */
+    .tabla :is(th, td).cifra { text-align: var(--t-izquierda, right); }
+    .tabla :is(th, td).centrado { text-align: var(--t-izquierda, center); }
+
+    /* Acciones: el 1% es el truco para que la columna se ajuste a su contenido. En
+       tarjeta la celda es un bloque y ese 1% sería literal (7 px de 711). */
+    .tabla :is(th, td).acciones {
+        width: var(--t-auto, 1%);
+        white-space: var(--t-normal, nowrap);
+    }
+    .tabla > tbody > tr > td.acciones {
+        grid-column: var(--t-todo, auto);
+        padding-top: var(--t-acciones-relleno, 0.5rem);
+        border-top: var(--t-acciones-borde, 0);
+    }
+    .tabla > tbody > tr > td.acciones::before { display: none; }
+    .tabla .grupo-acciones {
+        flex-wrap: var(--t-acciones-envolver, nowrap);
+        /* A la izquierda, no centradas: si una fila tiene una acción más, las demás no se
+           mueven y los iconos del mismo tipo quedan en columna */
+        justify-content: flex-start;
+    }
+
+    @media (max-width: 767px) {
+        .tabla { --tarjeta: ; }
+    }
+    @media (max-width: 1023px) {
+        .tabla--media { --tarjeta: ; }
+    }
+    @media (max-width: 1279px) {
+        .tabla--ancha { --tarjeta: ; }
+    }
+
+    /* Columna accesoria: se oculta donde la tabla va justa, en lugar de pasar a tarjetas
+       antes de tiempo o de dejar scroll lateral (divulgación progresiva de columnas). En
+       modo tarjeta reaparece, porque ahí el espacio es vertical y sobra. */
+    @media (min-width: 1024px) and (max-width: 1399px) {
+        .tabla--media :is(th, td).col-secundaria { display: none; }
+    }
+}
+
+/* ===========================================================================
+   4. COMPORTAMIENTOS
+   Fuera de capa a propósito: estos sí deben ganar siempre.
+   =========================================================================== */
+
+/* Alpine: evita el parpadeo del contenido antes de inicializarse */
+[x-cloak] { display: none; }
+
+/* Botón flotante de volver arriba: lo muestra scroll-top.js al bajar */
+#btn-scroll-top { display: none; }
+#btn-scroll-top.show { display: flex; }
+
+/* Panel de filtros plegable (Alpine cambia la clase) */
+.filter-collapsed {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+.filter-expanded {
+    max-height: 2000px;
+    opacity: 1;
+    pointer-events: auto;
+    overflow: visible;
+}
+
+/* ===========================================================================
+   5. IMPRESIÓN
+   =========================================================================== */
+@media print {
+    .barra-superior,
+    aside,
+    .pestanas,
+    .print-hide,
+    .accion,
+    .grupo-acciones,
+    .boton { display: none; }
+
+    #perfil-pdf {
+        border: none;
+        box-shadow: none;
+    }
+
+    body { background-color: #fff; }
+}

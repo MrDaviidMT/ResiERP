@@ -1,0 +1,103 @@
+services:
+  nginx:
+    # Imagen sin privilegios (no corre como root, escucha en 8080) con los archivos públicos dentro
+    build:
+      context: .
+      target: web
+    container_name: ResidenciaERP_nginx
+    restart: unless-stopped
+    ports:
+      - "80:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      - app
+    networks:
+      - frontend
+
+  app:
+    build: .
+    container_name: ResidenciaERP_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./.env:/var/www/html/.env:ro
+      - residentes_storage:/var/www/html/storage/app/private
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      mysql:
+        # Espera a que MySQL responda de verdad: antes las migraciones del arranque
+        # podían lanzarse con la base de datos aún iniciándose (hallazgo S9)
+        condition: service_healthy
+    networks:
+      - frontend
+      - backend
+
+  # Tareas programadas (política de conservación). Comparte imagen y .env con "app";
+  # schedule:work se queda en primer plano y lanza lo que toque cada minuto.
+  scheduler:
+    build: .
+    container_name: ResidenciaERP_scheduler
+    restart: unless-stopped
+    working_dir: /var/www/html
+    entrypoint: ["php", "artisan", "schedule:work"]
+    volumes:
+      - ./.env:/var/www/html/.env:ro
+      - residentes_storage:/var/www/html/storage/app/private
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - backend
+
+  mysql:
+    image: mysql:8.4.13
+    container_name: ResidenciaERP_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+      # Privilegios mínimos para el usuario de la aplicación (hallazgo S12)
+      - ./docker/mysql-privilegios.sh:/docker-entrypoint-initdb.d/10-privilegios.sh:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      # Red interna: MySQL no es accesible desde fuera ni desde nginx
+      - backend
+
+volumes:
+  db_data:
+    driver: local
+  residentes_storage:
+    driver: local
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true

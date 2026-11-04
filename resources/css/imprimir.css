@@ -1,0 +1,17 @@
+/* Copia de la historia clínica (derecho de acceso, L4): página suelta pensada para
+   imprimir o guardar como PDF. No carga la hoja de la aplicación porque no necesita
+   nada de la interfaz; estos estilos estaban en un <style> dentro de la vista. */
+
+body { font-family: system-ui, sans-serif; color: #111; margin: 2rem; font-size: 12px; }
+h1 { font-size: 18px; margin-bottom: .25rem; }
+h2 { font-size: 14px; margin: 1.5rem 0 .5rem; border-bottom: 1px solid #ccc; padding-bottom: .2rem; }
+table { width: 100%; border-collapse: collapse; margin-bottom: .5rem; }
+th, td { border: 1px solid #ddd; padding: .35rem .5rem; text-align: left; vertical-align: top; }
+th { background: #f3f4f6; }
+.anulado { color: #777; text-decoration: line-through; }
+.nota { color: #555; font-size: 11px; }
+footer { margin-top: 2rem; border-top: 1px solid #ccc; padding-top: .5rem; color: #555; font-size: 11px; }
+@media print { body { margin: 0; } .no-print { display: none; } }
+
+/* Barra con los botones de imprimir y volver, que no se imprime */
+.acciones-impresion { margin-bottom: 1rem; }

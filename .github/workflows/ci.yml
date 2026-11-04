@@ -1,0 +1,226 @@
+# Integración continua de ResiERP.
+# Cinco comprobaciones independientes que corren en paralelo: estilo, tests en SQLite,
+# tests en MySQL, auditoría de dependencias y construcción de las imágenes con Trivy.
+name: CI
+
+on:
+  # El git flow del proyecto: se comprueba lo que llega a develop y main, y también cada rama de trabajo
+  push:
+    branches: [main, develop, 'feature/**', 'bugfix/**', 'release/**', 'hotfix/**']
+  pull_request:
+    branches: [main, develop]
+  # Los lunes a las 6:00 UTC: una dependencia o una imagen base que nadie ha tocado puede
+  # volverse vulnerable sola cuando se publica un aviso de seguridad nuevo
+  schedule:
+    - cron: '0 6 * * 1'
+  # Permite lanzarlo a mano desde la pestaña Actions
+  workflow_dispatch:
+
+# Si llegan dos pushes seguidos a la misma rama, se cancela la ejecución anterior
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Mínimo privilegio: el token de la ejecución solo puede leer el código
+permissions:
+  contents: read
+
+env:
+  PHP_VERSION: '8.4'
+  NODE_VERSION: '22'
+  # Versión fijada de Trivy: así el resultado no cambia por una actualización de la herramienta
+  # (la base de datos de vulnerabilidades sí se descarga al día en cada ejecución)
+  TRIVY_VERSION: v0.76.1
+
+jobs:
+  estilo:
+    name: Estilo del código (Pint)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/php-app
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+      # --test no toca los ficheros: solo falla si algo no está formateado.
+      # Para arreglarlo en local: vendor/bin/pint
+      - name: Comprobar el formato
+        run: vendor/bin/pint --test
+
+  tests:
+    name: Tests (SQLite)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/php-app
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Instalar dependencias de JavaScript
+        run: npm ci
+
+      # Las vistas llaman a @vite(): sin el manifest de assets compilados, todos los tests
+      # que renderizan una página fallan. Compilar aquí también comprueba que el front compila.
+      - name: Compilar los assets
+        run: npm run build
+
+      - name: Preparar el entorno
+        # Partir de .env.example comprueba además que el fichero de ejemplo sigue completo
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      # phpunit.xml fija SQLite en memoria, así que este job no necesita base de datos
+      - name: Tests
+        run: php artisan test
+
+  tests-mysql:
+    name: Tests (MySQL 8.4)
+    runs-on: ubuntu-24.04
+
+    services:
+      mysql:
+        image: mysql:8.4.13
+        env:
+          # Base de datos de usar y tirar: existe solo durante este job, dentro del runner,
+          # y no es accesible desde fuera. No es un secreto ni se parece a ninguno real.
+          MYSQL_ROOT_PASSWORD: ci_throwaway
+          MYSQL_DATABASE: resierp_test
+        ports:
+          - 3306:3306
+        # Sin healthcheck, los primeros tests se lanzarían contra un MySQL aún arrancando
+        # (el mismo hallazgo S9 que se corrigió en compose.yaml)
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -uroot -pci_throwaway"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 15
+
+    env:
+      # Estas variables ganan a las de phpunit.xml (que las declara sin force="true") y a .env:
+      # la suite corre contra el mismo motor que producción. Aquí no se omite ningún test;
+      # en SQLite hay uno que no puede ejecutarse (SELECT ... FOR UPDATE).
+      DB_CONNECTION: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: resierp_test
+      DB_USERNAME: root
+      DB_PASSWORD: ci_throwaway
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/php-app
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Instalar dependencias de JavaScript
+        run: npm ci
+
+      - name: Compilar los assets
+        run: npm run build
+
+      - name: Preparar el entorno
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Tests
+        run: php artisan test
+
+      # Lo que hace el entrypoint del contenedor al desplegar, más dos comprobaciones que los
+      # tests no cubren: que los seeders se pueden repetir (son idempotentes) y que todas las
+      # migraciones saben deshacerse. La marcha atrás es la red de seguridad de un despliegue.
+      - name: Simular el despliegue (migrar, sembrar dos veces y deshacer)
+        env:
+          # Obligatorias: el sembrado se detiene si faltan, para no crear usuarios con una
+          # contraseña aleatoria que nadie conoce. Estas son de usar y tirar, como la base
+          # de datos de este job.
+          ADMIN_PASSWORD: ci-throwaway-admin-2026
+          DEMO_PASSWORD: ci-throwaway-demo-2026
+        run: |
+          php artisan migrate:fresh --force
+          php artisan db:seed --force
+          php artisan db:seed --force
+          php artisan migrate:reset --force
+
+  dependencias:
+    name: Auditoría de dependencias
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          coverage: none
+
+      # --locked audita composer.lock sin instalar nada: no hace falta vendor/
+      - name: composer audit
+        run: composer audit --locked
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      # Incluye las dependencias de desarrollo a propósito: quien compila los assets también
+      # ejecuta su código, así que una dependencia de compilación comprometida importa
+      - name: npm audit
+        run: npm audit --audit-level=high
+
+  imagen:
+    name: Imágenes y análisis (Trivy)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # --pull fuerza a bajar la imagen base en lugar de usar una copia cacheada del runner:
+      # si no, se analizaría una base vieja y el resultado sería falsamente tranquilizador
+      - name: Construir la imagen de la aplicación
+        run: docker build --pull -t resierp:ci .
+
+      - name: Construir la imagen de nginx
+        run: docker build --pull --target web -t resierp-web:ci .
+
+      # ignore-unfixed: solo bloquea lo que se puede arreglar hoy. Un CVE sin parche publicado
+      # dejaría la CI roja indefinidamente sin que haya nada que hacer; se revisa a mano.
+      - name: Trivy — imagen de la aplicación
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: resierp:ci
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          version: ${{ env.TRIVY_VERSION }}
+
+      - name: Trivy — imagen de nginx
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: resierp-web:ci
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          version: ${{ env.TRIVY_VERSION }}
+
+      # Análisis estático del Dockerfile: usuario root, versiones sin fijar, secretos en capas...
+      - name: Trivy — configuración del Dockerfile
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          version: ${{ env.TRIVY_VERSION }}

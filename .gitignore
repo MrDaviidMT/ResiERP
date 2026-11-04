@@ -1,0 +1,65 @@
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+.phpactor.json
+.phpunit.result.cache
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+auth.json
+/node_modules
+/public/build
+/public/fonts-manifest.dev.json
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/storage/framework/testing
+/vendor
+_ide_helper.php
+Homestead.json
+Homestead.yaml
+Thumbs.db
+
+# Archivos subidos por la aplicación: pueden ser documentos clínicos
+/storage/app/private/
+
+# Claves, certificados y credenciales
+*.pem
+*.key
+*.p12
+*.pfx
+*.kdbx
+id_rsa*
+id_ecdsa*
+id_ed25519*
+credentials*.json
+.aws/
+.ssh/
+
+# Volcados y copias de seguridad: contienen datos reales
+*.sql
+*.sql.gz
+*.dump
+*.bak
+*.backup
+backups/
+
+# Terraform: el estado guarda secretos en claro
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+.terraform/
+
+# Ansible
+.vault_pass*
+.vault-pass*
+infra/ansible/inventory/*
+!infra/ansible/inventory/*.example*
