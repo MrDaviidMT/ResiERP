@@ -3,6 +3,7 @@
 .env
 .env.*
 !.env.example
+!.env.*.example
 .phpactor.json
 .phpunit.result.cache
 /.idea
@@ -29,6 +30,7 @@ Thumbs.db
 /storage/app/private/
 
 # Claves, certificados y credenciales
+/secrets/
 *.pem
 *.key
 *.p12
