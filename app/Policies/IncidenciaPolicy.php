@@ -6,7 +6,7 @@ use App\Enums\Permission;
 use App\Models\Incidencia;
 use App\Models\User;
 
-// Reportar es libre; ver las de tipo "personal" es de dirección y de quien la registró (D9);
+// Reportar es libre; ver las de tipo "personal" es de dirección y de quien la registró;
 // atender (editar, cambiar estado) depende de la categoría: incidencias.atender.{categoria}.
 class IncidenciaPolicy
 {

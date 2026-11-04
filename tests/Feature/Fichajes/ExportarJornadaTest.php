@@ -9,7 +9,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-// L5 (auditoría): ET art. 34.9. El registro debe poder entregarse al trabajador,
+// ET art. 34.9. El registro debe poder entregarse al trabajador,
 // a sus representantes y a la Inspección de Trabajo
 class ExportarJornadaTest extends TestCase
 {

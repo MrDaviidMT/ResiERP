@@ -5,7 +5,7 @@ namespace Tests\Feature\Seguridad;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
-// A1 (auditoría): el disco privado no debe exponer rutas de descarga ni de subida
+// El disco privado no debe exponer rutas de descarga ni de subida
 class AlmacenamientoPrivadoTest extends TestCase
 {
     public function test_the_private_disk_does_not_publish_storage_routes(): void

@@ -44,7 +44,7 @@ class AuditObserverTest extends TestCase
         $this->assertSame('NavegadorDePrueba/1.0', $log->user_agent);
     }
 
-    // L2 (auditoría): minimización de datos en el registro de auditoría
+    // Minimización de datos en el registro de auditoría
     public function test_update_log_only_contains_the_changed_fields(): void
     {
         $this->actingAs(User::factory()->role('superadmin')->create());

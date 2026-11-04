@@ -35,8 +35,6 @@
                             <td class="text-tinta-suave text-xs" data-label="Fecha">{{ $informe->created_at->format('d/m/Y') }}</td>
                             <td class="text-tinta-suave text-xs" data-label="Autor">{{ $informe->user->name }}</td>
                             <td class="acciones" data-label="Acciones">
-                                {{-- Las mismas acciones que en el listado de informes: antes aquí solo estaba
-                                     "Ver", así que desde el historial no se podía editar ni anular --}}
                                 <div class="grupo-acciones">
                                     <a href="{{ route('informes.show', $informe) }}" title="Ver informe" class="accion tono-neutro"><x-lucide-eye  /></a>
                                     @if($informe->pdf_path)

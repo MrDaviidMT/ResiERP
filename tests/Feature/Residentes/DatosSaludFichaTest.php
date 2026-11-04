@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-// L1 (auditoría): el grupo sanguíneo y el grado de dependencia son datos de salud (Ley 41/2002 art. 16)
+// El grupo sanguíneo y el grado de dependencia son datos de salud (Ley 41/2002 art. 16)
 class DatosSaludFichaTest extends TestCase
 {
     use RefreshDatabase;

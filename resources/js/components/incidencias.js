@@ -14,7 +14,7 @@ export function initIncidenciasForm() {
     if (!categoriaSel) return;
 
     function ajustarFormulario() {
-        // El selector de residente no existe para quien no puede ver residentes (D11)
+        // El selector de residente no existe para quien no puede ver residentes
         if (!wrapResidente) return;
         if (categoriaSel.value === 'sanitaria') {
             wrapResidente.classList.remove('hidden');

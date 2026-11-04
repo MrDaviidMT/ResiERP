@@ -9,7 +9,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-// D9 (auditoría): si no llega el dato de autorización, el familiar NO queda autorizado (fail-closed)
+// Si no llega el dato de autorización, el familiar NO queda autorizado (fail-closed)
 class FamiliarAutorizacionTest extends TestCase
 {
     use RefreshDatabase;

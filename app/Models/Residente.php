@@ -90,7 +90,7 @@ class Residente extends Model
         return $this->hasMany(VisitaMedica::class);
     }
 
-    /** Familiares autorizados a visitar al residente (D9/D11): los únicos a los que se puede atribuir una visita. */
+    /** Familiares autorizados a visitar al residente: los únicos a los que se puede atribuir una visita. */
     public function familiaresAutorizados()
     {
         return $this->familiares()->wherePivot('autorizado', true);

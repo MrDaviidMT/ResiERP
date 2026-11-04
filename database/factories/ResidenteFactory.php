@@ -20,7 +20,7 @@ class ResidenteFactory extends Factory
         ];
     }
 
-    /** DNI con su letra de control, para que pase la validación real (D17). */
+    /** DNI con su letra de control, para que pase la validación real. */
     private function dniValido(): string
     {
         $numero = $this->faker->unique()->numberBetween(10000000, 99999999);

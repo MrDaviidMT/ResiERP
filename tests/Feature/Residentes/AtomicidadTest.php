@@ -12,12 +12,12 @@ use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Tests\TestCase;
 
-// D14 y D16 (auditoría): operaciones de varios pasos atómicas y con bloqueo de fila
+// Operaciones de varios pasos atómicas y con bloqueo de fila
 class AtomicidadTest extends TestCase
 {
     use RefreshDatabase;
 
-    // D16: si falla la vinculación, no queda un familiar suelto sin residentes
+    // Si falla la vinculación, no queda un familiar suelto sin residentes
     public function test_creating_a_relative_and_its_links_is_atomic(): void
     {
         $ts = User::factory()->role(Role::TrabajadorSocial)->create();
@@ -41,7 +41,7 @@ class AtomicidadTest extends TestCase
         $this->assertSame(0, Familiar::count(), 'El familiar quedó creado sin sus vinculaciones');
     }
 
-    // D14: cambiar el tipo o el mantenimiento de una habitación bloquea su fila
+    // Cambiar el tipo o el mantenimiento de una habitación bloquea su fila
     public function test_room_changes_lock_the_row(): void
     {
         if (DB::connection()->getDriverName() === 'sqlite') {

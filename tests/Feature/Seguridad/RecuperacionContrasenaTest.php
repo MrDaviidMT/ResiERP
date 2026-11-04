@@ -8,7 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
-// S3 y S4 (auditoría): sin enumeración de cuentas y con límite de intentos por IP
+// Sin enumeración de cuentas y con límite de intentos por IP
 class RecuperacionContrasenaTest extends TestCase
 {
     use RefreshDatabase;

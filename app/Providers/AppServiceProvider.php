@@ -72,7 +72,7 @@ class AppServiceProvider extends ServiceProvider
             Gate::policy($modelo, RegistroClinicoPolicy::class);
         }
 
-        // L9 (auditoría): acceso a datos de salud. Mínimo 12 caracteres, letras y números, y
+        // Acceso a datos de salud. Mínimo 12 caracteres, letras y números, y
         // contraseña no filtrada (se consulta haveibeenpwned por hash parcial: la contraseña no sale de aquí).
         // En los tests no se comprueba: dependería de una llamada de red.
         Password::defaults(function () {

@@ -13,9 +13,7 @@ use Tests\TestCase;
  * El sembrado inicial debe tomar las contraseñas de la configuración, no de env().
  *
  * El entrypoint del contenedor ejecuta `php artisan optimize`, que cachea la configuración;
- * a partir de ahí Laravel no lee el .env y `env()` devuelve null fuera de config/. El seeder
- * usaba `env('ADMIN_PASSWORD', Str::random(16))`, así que en un despliegue real creaba los
- * usuarios con una contraseña aleatoria que nadie conocía y nadie podía entrar.
+ * a partir de ahí Laravel no lee el .env y `env()` devuelve null fuera de config/.
  */
 class SembradoTest extends TestCase
 {

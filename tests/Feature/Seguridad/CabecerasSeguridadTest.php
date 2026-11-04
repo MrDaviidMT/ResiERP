@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-// S8 y S13 (auditoría): cabeceras de seguridad en todas las respuestas
+// Cabeceras de seguridad en todas las respuestas
 class CabecerasSeguridadTest extends TestCase
 {
     use RefreshDatabase;

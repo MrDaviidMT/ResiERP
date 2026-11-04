@@ -11,7 +11,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-// D7 y D8 (auditoría): cambiar una dieta o autorizar a un familiar deja rastro de quién lo hizo
+// Cambiar una dieta o autorizar a un familiar deja rastro de quién lo hizo
 class AuditoriaDietaVinculosTest extends TestCase
 {
     use RefreshDatabase;

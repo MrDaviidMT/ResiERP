@@ -32,9 +32,7 @@ document.addEventListener('change', function (e) {
     salida.textContent = input.files && input.files[0] ? input.files[0].name : salida.dataset.vacio;
 });
 
-// Marcar o desmarcar de golpe un grupo de casillas (informes y actividades). Antes era un
-// onclick en el HTML, que la CSP bloquea; además ahora se limita al formulario del botón
-// en lugar de a toda la página.
+// Marcar o desmarcar de golpe las casillas de un grupo, dentro del formulario del botón.
 document.addEventListener('click', function (e) {
     const btn = e.target.closest('[data-marcar],[data-desmarcar]');
     if (!btn) return;

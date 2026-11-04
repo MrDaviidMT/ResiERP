@@ -10,7 +10,7 @@ use App\Models\Visita;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-// D11 (auditoría): una visita no puede atribuirse a un familiar que no está vinculado
+// Una visita no puede atribuirse a un familiar que no está vinculado
 // a ese residente o que no está autorizado a visitarle
 class VisitanteAutorizadoTest extends TestCase
 {

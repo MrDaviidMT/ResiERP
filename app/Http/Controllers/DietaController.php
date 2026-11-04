@@ -23,7 +23,7 @@ class DietaController extends Controller
             'observaciones' => 'nullable|string',
         ]);
 
-        // D7: update() sobre la relación es una consulta y no dispara el Observer de auditoría
+        // Update() sobre la relación es una consulta y no dispara el Observer de auditoría
         if ($residente->dieta) {
             $residente->dieta->update($data);
             $msg = 'Dieta actualizada correctamente.';
