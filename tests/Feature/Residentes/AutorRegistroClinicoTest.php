@@ -50,7 +50,7 @@ class AutorRegistroClinicoTest extends TestCase
         $this->assertSame('Hipertensión arterial', $diagnostico->fresh()->nombre);
     }
 
-    // D13 (auditoría): un cuidado editado por otra persona seguía figurando con el autor original
+    // Un cuidado editado por otra persona seguía figurando con el autor original
     public function test_only_the_author_can_correct_a_daily_care_record(): void
     {
         $autor = User::factory()->role(Role::Auxiliar)->create();

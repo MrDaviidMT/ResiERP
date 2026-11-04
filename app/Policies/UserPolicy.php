@@ -37,7 +37,7 @@ class UserPolicy
     /**
      * Anti-escalada de privilegios: solo se asigna un rol si quien lo asigna ya tiene todos sus permisos
      * administrativos (Permission::esAdministrativo). Los permisos clínicos no cuentan, porque el director
-     * asigna puestos clínicos sin poder editar contenido clínico (D7); ese riesgo se cubre con la auditoría.
+     * asigna puestos clínicos sin poder editar contenido clínico; ese riesgo se cubre con la auditoría.
      * El superadministrador nunca se asigna desde la aplicación.
      */
     public function asignarRol(User $actor, Role $rol): bool

@@ -93,7 +93,7 @@ class FamiliarController extends Controller
             ]);
         }
 
-        // D16: el familiar y sus vinculaciones se crean juntos o no se crean
+        // El familiar y sus vinculaciones se crean juntos o no se crean
         $familiar = DB::transaction(function () use ($data) {
             $familiar = Familiar::create([
                 'nombre' => $data['nombre'],
@@ -188,7 +188,7 @@ class FamiliarController extends Controller
             ]);
         }
 
-        // D16: el familiar y sus vinculaciones se crean juntos o no se crean
+        // El familiar y sus vinculaciones se crean juntos o no se crean
         $familiar = DB::transaction(function () use ($data) {
             $familiar = Familiar::create([
                 'nombre' => $data['nombre'],
@@ -246,7 +246,7 @@ class FamiliarController extends Controller
         $pivote = $this->datosPivote($data['vinculaciones'] ?? []);
         $familiar->residentes()->sync($pivote);
 
-        // D8: queda constancia de con qué residentes queda vinculado y con qué autorización
+        // Queda constancia de con qué residentes queda vinculado y con qué autorización
         Log::registrar($familiar, 'links_synced', [
             'vinculos' => collect($pivote)->map(fn (array $v, int $residenteId) => ['residente_id' => $residenteId] + $v)->values()->all(),
         ]);
@@ -281,7 +281,7 @@ class FamiliarController extends Controller
 
         $residente->familiares()->attach($data['familiar_id'], $vinculo);
 
-        // D8: las tablas intermedias no disparan el Observer; quién autoriza a un familiar debe constar
+        // Las tablas intermedias no disparan el Observer; quién autoriza a un familiar debe constar
         Log::registrar(Familiar::find($data['familiar_id']), 'linked', ['residente_id' => $residente->id] + $vinculo);
 
         return redirect()->route('familiares.index', $residente)

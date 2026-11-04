@@ -11,7 +11,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 // Autorización que depende del dato concreto (categoría, propietario, tipo).
-// Cubre los huecos T1–T5 que las pruebas de mutación de la auditoría dejaron sin detectar.
 class AutorizacionPorRegistroTest extends TestCase
 {
     use RefreshDatabase;
@@ -21,7 +20,6 @@ class AutorizacionPorRegistroTest extends TestCase
         return Incidencia::create(['categoria' => $categoria, 'titulo' => 'Avería', 'prioridad' => 'leve']);
     }
 
-    // T1
     public function test_cannot_change_the_status_of_an_incident_outside_your_categories(): void
     {
         $auxiliar = User::factory()->role(Role::Auxiliar)->create();
@@ -32,7 +30,6 @@ class AutorizacionPorRegistroTest extends TestCase
         $this->assertSame('pendiente', $incidencia->fresh()->estado);
     }
 
-    // T2
     public function test_cannot_edit_an_incident_outside_your_categories(): void
     {
         $auxiliar = User::factory()->role(Role::Auxiliar)->create();
@@ -46,7 +43,6 @@ class AutorizacionPorRegistroTest extends TestCase
         $this->assertSame('Avería', $incidencia->fresh()->titulo);
     }
 
-    // T3
     public function test_cannot_see_another_employees_time_entry(): void
     {
         $auxiliar = User::factory()->role(Role::Auxiliar)->create();
@@ -56,7 +52,6 @@ class AutorizacionPorRegistroTest extends TestCase
         $this->actingAs($auxiliar)->post(route('fichajes.salida', $ajeno))->assertForbidden();
     }
 
-    // T4
     public function test_cannot_clock_in_on_behalf_of_another_employee(): void
     {
         $auxiliar = User::factory()->role(Role::Auxiliar)->create();
@@ -67,7 +62,6 @@ class AutorizacionPorRegistroTest extends TestCase
         $this->assertSame(0, Fichaje::where('user_id', $otro->id)->count());
     }
 
-    // T5
     public function test_author_cannot_change_a_report_to_a_type_they_cannot_create(): void
     {
         $enfermera = User::factory()->role(Role::Enfermero)->create();

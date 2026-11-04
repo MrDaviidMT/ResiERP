@@ -6,9 +6,8 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * La base de datos impide borrar algo que tenga historial (última línea de defensa).
- * Antes, borrar un residente, una habitación o un usuario borraba en cascada su documentación clínica,
- * sus incidencias o su registro de jornada; y algunas referencias a usuarios se ponían a NULL,
- * con lo que la auditoría perdía quién hizo cada cosa.
+ * Borrar un residente, una habitación o un usuario ya no arrastra su documentación clínica,
+ * sus incidencias ni su registro de jornada.
  */
 return new class extends Migration
 {

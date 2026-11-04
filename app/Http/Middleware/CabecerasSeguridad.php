@@ -7,10 +7,10 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Cabeceras de seguridad (hallazgos S8 y S13 de la auditoría).
+ * Cabeceras de seguridad.
  *
- * Van en la aplicación y no solo en nginx para que se puedan comprobar con tests y para que
- * sigan estando si cambia el servidor web. Nginx añade las suyas como segunda capa.
+ * Van en la aplicación para que se puedan comprobar con tests y sigan estando si cambia
+ * el servidor web. Nginx solo las añade a los archivos que sirve él.
  */
 class CabecerasSeguridad
 {
@@ -53,7 +53,7 @@ class CabecerasSeguridad
         return implode('; ', [
             "default-src 'self'",
             // 'unsafe-eval': Alpine.js compila sus expresiones con new Function(). La alternativa es
-            // la variante @alpinejs/csp, que obliga a reescribir los 27 componentes x-data (pendiente).
+            // la variante @alpinejs/csp, que obliga a reescribir los componentes x-data.
             "script-src 'self' 'unsafe-eval'",
             // 'unsafe-inline': SweetAlert2 y Alpine aplican estilos en línea
             "style-src 'self' 'unsafe-inline'",

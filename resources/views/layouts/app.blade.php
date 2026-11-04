@@ -157,9 +157,7 @@
 
                                 <form method="POST" action="{{ route('logout') }}">
                                     @csrf
-                                    {{-- Botón de envío de verdad: era un <a> con onclick, y al bloquearlo la CSP
-                                         el navegador seguía el href y hacía GET /logout (405). Así no hace falta
-                                         ningún JavaScript para cerrar sesión. --}}
+                                    {{-- Sin JavaScript: la CSP bloquearía un onclick --}}
                                     <button type="submit" title="Cerrar sesión"
                                             class="w-full px-4 py-2 text-start text-sm leading-5 hover:bg-fondo focus:outline-none focus:bg-fondo transition duration-150 ease-in-out cursor-pointer flex items-center space-x-2 text-peligro hover:text-peligro font-medium">
                                         <x-lucide-log-out class="w-4 h-4" /> <span>{{ __('Cerrar Sesión') }}</span>

@@ -71,10 +71,8 @@ class SmokeTest extends TestCase
 
             $this->assertLessThan(500, $respuesta->getStatusCode(), "GET /{$uri}: ".($excepcion?->getMessage() ?? ''));
 
-            // La CSP declara script-src sin 'unsafe-inline' (hallazgo S13), así que el navegador
-            // ignora cualquier manejador escrito en el HTML. Un onclick aquí no falla en los tests
-            // pero deja el botón muerto en producción: así se colaron 13, y entre ellos el de
-            // cerrar sesión, que acabó haciendo GET /logout y devolviendo un 405.
+            // La CSP declara script-src sin 'unsafe-inline', así que el navegador
+            // ignora cualquier manejador escrito en el HTML: el botón quedaría muerto en producción.
             if (str_contains((string) $base->headers->get('Content-Type'), 'text/html')) {
                 // Una directiva de Blade que llega al navegador es que no se procesó. Pasó al
                 // meter data-json='@json(...)' dentro de la etiqueta de un componente: ahí el

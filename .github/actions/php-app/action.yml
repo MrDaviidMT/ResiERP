@@ -14,8 +14,8 @@ runs:
   using: composite
   steps:
     # Las acciones de terceros se fijan por SHA, no por etiqueta: una etiqueta se puede mover
-    # a otro commit y ejecutaríamos código distinto sin cambiar nada (mismo criterio que el
-    # hallazgo S5 con las imágenes de Docker). El comentario dice a qué versión corresponde.
+    # a otro commit y ejecutaríamos código distinto sin cambiar nada. El comentario dice a qué
+    # versión corresponde.
     - name: Instalar PHP
       uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
       with:

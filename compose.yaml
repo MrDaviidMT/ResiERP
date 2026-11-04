@@ -59,8 +59,7 @@ services:
       - ALL
     depends_on:
       mysql:
-        # Espera a que MySQL responda de verdad: antes las migraciones del arranque
-        # podían lanzarse con la base de datos aún iniciándose (hallazgo S9)
+        # Las migraciones del arranque necesitan que MySQL ya responda
         condition: service_healthy
     networks:
       - frontend
@@ -125,7 +124,7 @@ services:
       - mysql_root_password
     volumes:
       - db_data:/var/lib/mysql
-      # Privilegios mínimos para el usuario de la aplicación (hallazgo S12)
+      # Privilegios mínimos para el usuario de la aplicación
       - ./docker/mysql-privilegios.sh:/docker-entrypoint-initdb.d/10-privilegios.sh:ro
     healthcheck:
       # Sin credenciales: ping solo comprueba que el servidor responde

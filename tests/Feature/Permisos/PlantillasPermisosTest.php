@@ -95,7 +95,7 @@ class PlantillasPermisosTest extends TestCase
             ['D7', R::Director, P::CuidadosRegistrar, false],
             ['D7', R::Director, P::MedicacionEditar, false],
             ['D7', R::Director, P::DietasEditar, false],
-            // D2: cada uno ve los informes según su sensibilidad
+            // Cada uno ve los informes según su sensibilidad
             ['D2', R::TrabajadorSocial, P::InformesVerEnfermeria, false],
             ['D2', R::TrabajadorSocial, P::InformesVerMedico, false],
             ['D2', R::TrabajadorSocial, P::InformesVerFisioterapia, false],
@@ -109,7 +109,7 @@ class PlantillasPermisosTest extends TestCase
             ['D2', R::Psicologo, P::InformesVerSocial, false],
             ['D2', R::Fisioterapeuta, P::InformesVerSocial, false],
             ['D2', R::Fisioterapeuta, P::InformesVerPsicologico, false],
-            // D2 + D7: el director solo crea informes generales y es quien borra
+            // El director solo crea informes generales y es quien borra
             ['D2', R::Director, P::InformesCrearEnfermeria, false],
             ['D2', R::Director, P::InformesCrearMedico, false],
             ['D2', R::Director, P::InformesCrearFisioterapia, false],
@@ -119,7 +119,7 @@ class PlantillasPermisosTest extends TestCase
             // Editar visitas (la pantalla ya existía): dirección y recepción
             ['D4', R::Director, P::VisitasEditar, true],
             ['D4', R::Recepcionista, P::VisitasEditar, true],
-            // D4: registrar visitas, quien está en la puerta o con el residente; borrar, solo dirección
+            // Registrar visitas, quien está en la puerta o con el residente; borrar, solo dirección
             ['D4', R::Psicologo, P::VisitasRegistrar, false],
             ['D4', R::TrabajadorSocial, P::VisitasRegistrar, false],
             ['D4', R::Fisioterapeuta, P::VisitasRegistrar, false],
@@ -129,7 +129,7 @@ class PlantillasPermisosTest extends TestCase
             ['D4', R::Psicologo, P::VisitasAnular, false],
             ['D4', R::TrabajadorSocial, P::VisitasAnular, false],
             ['D4', R::Fisioterapeuta, P::VisitasAnular, false],
-            // D3: editar habitaciones, solo dirección
+            // Editar habitaciones, solo dirección
             ['D3', R::Enfermero, P::HabitacionesEditar, false],
             ['D3', R::Auxiliar, P::HabitacionesEditar, false],
             ['D3', R::Recepcionista, P::HabitacionesEditar, false],
@@ -137,10 +137,10 @@ class PlantillasPermisosTest extends TestCase
             ['D3', R::TrabajadorSocial, P::HabitacionesEditar, false],
             ['D3', R::Fisioterapeuta, P::HabitacionesEditar, false],
             ['D3', R::Mantenimiento, P::HabitacionesEditar, false],
-            // D5: enfermería registra cuidados y los auxiliares registran constantes
+            // Enfermería registra cuidados y los auxiliares registran constantes
             ['D5', R::Enfermero, P::CuidadosRegistrar, true],
             ['D5', R::Auxiliar, P::ConstantesRegistrar, true],
-            // D6: alta y edición de residentes, Dir y TS; baja y reincorporación, solo Dir
+            // Alta y edición de residentes, Dir y TS; baja y reincorporación, solo Dir
             ['D6', R::Enfermero, P::ResidentesCrear, false],
             ['D6', R::Enfermero, P::ResidentesEditar, false],
             ['D6', R::Enfermero, P::ResidentesBaja, false],
@@ -151,11 +151,11 @@ class PlantillasPermisosTest extends TestCase
             ['D6', R::Psicologo, P::ResidentesReincorporar, false],
             ['D6', R::TrabajadorSocial, P::ResidentesBaja, false],
             ['D6', R::TrabajadorSocial, P::ResidentesReincorporar, false],
-            // D8: enfermería, auxiliares y fisioterapia ven las actividades
+            // Enfermería, auxiliares y fisioterapia ven las actividades
             ['D8', R::Enfermero, P::ActividadesVer, true],
             ['D8', R::Auxiliar, P::ActividadesVer, true],
             ['D8', R::Fisioterapeuta, P::ActividadesVer, true],
-            // D10: borrar familiares, solo dirección
+            // Borrar familiares, solo dirección
             ['D10', R::Enfermero, P::FamiliaresBorrar, false],
             ['D10', R::Psicologo, P::FamiliaresBorrar, false],
             ['D10', R::TrabajadorSocial, P::FamiliaresBorrar, false],
@@ -165,7 +165,7 @@ class PlantillasPermisosTest extends TestCase
             ['F11', R::TrabajadorSocial, P::DietasVer, false],
             ['F11', R::Fisioterapeuta, P::DietasVer, false],
             ['F11', R::Mantenimiento, P::DietasVer, false],
-            // L1 (auditoría): grupo sanguíneo y dependencia, solo personal asistencial
+            // Grupo sanguíneo y dependencia, solo personal asistencial
             ['L1', R::Director, P::ResidentesVerSalud, true],
             ['L1', R::Enfermero, P::ResidentesVerSalud, true],
             ['L1', R::Auxiliar, P::ResidentesVerSalud, true],
@@ -185,9 +185,9 @@ class PlantillasPermisosTest extends TestCase
             ['ADR1', R::Enfermero, P::VisitasMedicasAnular, true],
             ['ADR1', R::Recepcionista, P::VisitasMedicasAnular, true],
             ['ADR1', R::Fisioterapeuta, P::VisitasMedicasAnular, true],
-            // L7 (auditoría): minimización. El DNI del residente y los datos de contacto de los
+            // Minimización. El DNI del residente y los datos de contacto de los
             // familiares solo para quien los necesita por su puesto
-            // L4 (auditoría): entregar copia de la historia clínica es un trámite de dirección y trabajo social
+            // Entregar copia de la historia clínica es un trámite de dirección y trabajo social
             ['L4', R::Director, P::ResidentesExportarHistorial, true],
             ['L4', R::TrabajadorSocial, P::ResidentesExportarHistorial, true],
             ['L7', R::Director, P::ResidentesVerDocumento, true],
@@ -282,8 +282,7 @@ class PlantillasPermisosTest extends TestCase
 
     /**
      * El seeder no debe depender de la caché de permisos de spatie: con el almacén de caché en
-     * base de datos puede quedar guardado un conjunto vacío, y antes el seeder fallaba
-     * ("There is no permission named `incidencias.ver`"). Detectado al probar en MySQL real.
+     * base de datos puede quedar guardado un conjunto vacío.
      */
     public function test_seeder_works_with_a_stale_empty_permission_cache(): void
     {

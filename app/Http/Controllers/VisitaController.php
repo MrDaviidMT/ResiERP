@@ -60,7 +60,7 @@ class VisitaController extends Controller
     }
 
     /**
-     * D11: una visita solo se atribuye a un familiar vinculado a ESE residente y autorizado a visitarle.
+     * Una visita solo se atribuye a un familiar vinculado a ESE residente y autorizado a visitarle.
      * Sin familiar es una visita de alguien no registrado, que sí se permite.
      */
     private function reglas(Residente $residente): array

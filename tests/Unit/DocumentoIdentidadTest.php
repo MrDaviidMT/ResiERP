@@ -6,7 +6,7 @@ use App\Rules\DocumentoIdentidad;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
-// D17 (auditoría): el documento de identidad debe ser válido, no cualquier texto
+// El documento de identidad debe ser válido, no cualquier texto
 class DocumentoIdentidadTest extends TestCase
 {
     private function valida(string $documento): bool

@@ -22,7 +22,7 @@ class IncidenciaController extends Controller
 
         $query = Incidencia::with(['habitacion', 'residente']);
 
-        // D9: las incidencias de tipo "personal" solo las ve dirección y quien las registró
+        // Las incidencias de tipo "personal" solo las ve dirección y quien las registró
         if (! Gate::allows(Permission::IncidenciasVerPersonal)) {
             $query->where(fn ($q) => $q->where('categoria', '!=', 'personal')->orWhere('user_id', $request->user()->id));
         }
@@ -56,7 +56,7 @@ class IncidenciaController extends Controller
             ->paginate(20);
 
         $habitaciones = Habitacion::orderBy('numero')->get();
-        // D11: el selector de residentes solo se carga para quien puede ver residentes
+        // El selector de residentes solo se carga para quien puede ver residentes
         $residentes = $request->user()->can(Permission::ResidentesVer)
             ? Residente::withoutTrashed()->with('habitacion')->orderBy('nombre')->get()
             : collect();
@@ -115,7 +115,7 @@ class IncidenciaController extends Controller
         $incidencia->load(['habitacion', 'residente']);
 
         $habitaciones = Habitacion::orderBy('numero')->get();
-        // D11: el selector de residentes solo se carga para quien puede ver residentes
+        // El selector de residentes solo se carga para quien puede ver residentes
         $residentes = auth()->user()->can(Permission::ResidentesVer)
             ? Residente::withoutTrashed()->with('habitacion')->orderBy('nombre')->get()
             : collect();

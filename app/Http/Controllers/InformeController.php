@@ -19,7 +19,7 @@ class InformeController extends Controller
 {
     public function index(Request $request)
     {
-        // D2: el listado solo muestra los tipos que el usuario puede leer
+        // El listado solo muestra los tipos que el usuario puede leer
         $query = Informe::with('user', 'residentes')->visiblesPara($request->user());
 
         if ($request->filled('tipo')) {

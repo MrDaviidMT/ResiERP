@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
- * Documento de identidad español (D17): DNI o NIE con su letra de control, o pasaporte.
+ * Documento de identidad español: DNI o NIE con su letra de control, o pasaporte.
  * Sin esta comprobación entraban documentos inventados, y la app compara DNI entre
  * residentes y familiares para detectar que son la misma persona.
  */

@@ -43,7 +43,7 @@ class HabitacionController extends Controller
             'observaciones' => 'nullable|string',
         ]);
 
-        // D14: bloqueo de fila, igual que al asignar habitación a un residente (evita la condición de carrera)
+        // Bloqueo de fila, igual que al asignar habitación a un residente (evita la condición de carrera)
         return DB::transaction(function () use ($data, $id) {
             $habitacion = Habitacion::lockForUpdate()->withCount('residentes')->findOrFail($id);
 

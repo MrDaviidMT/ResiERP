@@ -45,7 +45,7 @@ class ResidenteController extends Controller
             $query->where('habitacion_id', $habitacion_id);
         }
 
-        // Filtrar por grupo sanguíneo revelaría el dato a quien no puede verlo (L1)
+        // Filtrar por grupo sanguíneo revelaría el dato a quien no puede verlo
         if ($request->filled('grupo_sanguineo') && $request->user()->can(Permission::ResidentesVerSalud)) {
             $query->where('grupo_sanguineo', $grupo_sanguineo);
         }
@@ -87,7 +87,7 @@ class ResidenteController extends Controller
 
     public function store(Request $request)
     {
-        // D17: mismo documento escrito de dos formas = mismo documento
+        // Mismo documento escrito de dos formas = mismo documento
         $request->merge(['dni' => DocumentoIdentidad::normalizar((string) $request->input('dni'))]);
 
         $data = $request->validate([
@@ -129,7 +129,7 @@ class ResidenteController extends Controller
 
     public function edit($id)
     {
-        // D10: un residente archivado no se edita (asignarle habitación ocuparía una cama sin contar)
+        // Un residente archivado no se edita (asignarle habitación ocuparía una cama sin contar)
         $residente = Residente::findOrFail($id);
 
         $habitaciones = Habitacion::where('estado', '!=', 'mantenimiento')
@@ -146,7 +146,7 @@ class ResidenteController extends Controller
         $residente = Residente::findOrFail($id);
         $habitacionViejaId = $residente->habitacion_id;
 
-        // D17: mismo documento escrito de dos formas = mismo documento
+        // Mismo documento escrito de dos formas = mismo documento
         $request->merge(['dni' => DocumentoIdentidad::normalizar((string) $request->input('dni'))]);
 
         $data = $request->validate([
@@ -155,7 +155,7 @@ class ResidenteController extends Controller
             'dni' => ['required', 'string', 'max:20', new DocumentoIdentidad, Rule::unique('residentes', 'dni')->ignore($residente->id)],
             'nacimiento' => 'required|date|before:today',
             'ingreso' => 'required|date|after:nacimiento',
-            // D12: registrar una defunción da de baja al residente, así que exige el permiso de baja
+            // Registrar una defunción da de baja al residente, así que exige el permiso de baja
             'fecha_defuncion' => [
                 'nullable', 'date', 'after:nacimiento', 'before_or_equal:today',
                 Rule::prohibitedIf(fn () => ! $request->user()->can(Permission::ResidentesBaja)),
@@ -190,7 +190,7 @@ class ResidenteController extends Controller
 
             $residente->update($data);
 
-            // D12: un residente fallecido deja libre su cama y pasa al histórico
+            // Un residente fallecido deja libre su cama y pasa al histórico
             if (! empty($data['fecha_defuncion'])) {
                 $residente->update(['habitacion_id' => null]);
                 $residente->delete();

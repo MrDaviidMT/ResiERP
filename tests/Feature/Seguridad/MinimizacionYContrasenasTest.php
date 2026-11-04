@@ -9,7 +9,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-// L7 y L9 (auditoría): minimización de datos identificativos y contraseñas robustas
+// Minimización de datos identificativos y contraseñas robustas
 class MinimizacionYContrasenasTest extends TestCase
 {
     use RefreshDatabase;

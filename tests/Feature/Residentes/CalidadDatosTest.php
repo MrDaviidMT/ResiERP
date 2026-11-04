@@ -13,7 +13,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-// D17 (auditoría): no entran datos imposibles ni documentos inventados
+// No entran datos imposibles ni documentos inventados
 class CalidadDatosTest extends TestCase
 {
     use RefreshDatabase;

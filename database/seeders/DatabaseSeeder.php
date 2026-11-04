@@ -57,9 +57,8 @@ class DatabaseSeeder extends Seeder
      * configuración cacheada (`php artisan optimize`, que ejecuta el entrypoint) el .env
      * ya no se lee y env() devolvería null.
      *
-     * Sin respaldo aleatorio a propósito: antes se usaba Str::random(16), así que al faltar
-     * la variable el despliegue "funcionaba" pero nadie podía iniciar sesión. Es mejor
-     * detenerse y decir qué falta.
+     * Sin respaldo aleatorio a propósito: el despliegue "funcionaría", pero nadie podría
+     * iniciar sesión. Es mejor detenerse y decir qué falta.
      */
     private function contrasena(string $clave, string $variable): string
     {

@@ -11,8 +11,6 @@
             </div>
             <div class="grupo-acciones">
                 @if($informe->pdf_path)
-                {{-- Los tres con el mismo relleno, tamaño y forma: antes PDF era una pastilla y
-                     los otros dos texto suelto, así que no casaban aunque estuvieran centrados --}}
                 <a href="{{ route('informes.pdf', $informe) }}" target="_blank" title="Descargar PDF" class="boton tono-neutro">
                     <x-lucide-file />PDF
                 </a>

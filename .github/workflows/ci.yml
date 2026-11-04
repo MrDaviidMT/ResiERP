@@ -94,7 +94,6 @@ jobs:
         ports:
           - 3306:3306
         # Sin healthcheck, los primeros tests se lanzarían contra un MySQL aún arrancando
-        # (el mismo hallazgo S9 que se corrigió en compose.yaml)
         options: >-
           --health-cmd "mysqladmin ping -h 127.0.0.1 -uroot -pci_throwaway"
           --health-interval 10s

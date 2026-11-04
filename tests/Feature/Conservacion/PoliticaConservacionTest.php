@@ -12,7 +12,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-// L6 (auditoría): política de conservación (RGPD art. 5.1.e). Ver config/conservacion.php
+// Política de conservación (RGPD art. 5.1.e). Ver config/conservacion.php
 class PoliticaConservacionTest extends TestCase
 {
     use RefreshDatabase;

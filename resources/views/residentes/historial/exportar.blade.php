@@ -1,4 +1,4 @@
-{{-- L4: copia de la historia clínica para el derecho de acceso (Ley 41/2002 art. 18, RGPD art. 15).
+{{-- Copia de la historia clínica para el derecho de acceso (Ley 41/2002 art. 18, RGPD art. 15).
      Pensada para imprimir o guardar como PDF desde el navegador. --}}
 <!DOCTYPE html>
 <html lang="es">

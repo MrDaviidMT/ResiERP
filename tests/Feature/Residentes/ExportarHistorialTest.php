@@ -13,7 +13,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-// L4 (auditoría): derecho de acceso a la historia clínica (Ley 41/2002 art. 18, RGPD art. 15)
+// Derecho de acceso a la historia clínica (Ley 41/2002 art. 18, RGPD art. 15)
 class ExportarHistorialTest extends TestCase
 {
     use RefreshDatabase;

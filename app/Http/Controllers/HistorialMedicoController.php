@@ -108,7 +108,7 @@ class HistorialMedicoController extends Controller
                 $validator->errors()->add('tension_sistolica', 'Debe registrar al menos un valor médico.');
             }
 
-            // D17: una tensión sistólica por debajo de la diastólica es imposible
+            // Una tensión sistólica por debajo de la diastólica es imposible
             if ($request->filled('tension_sistolica') && $request->filled('tension_diastolica')
                 && (int) $request->input('tension_sistolica') <= (int) $request->input('tension_diastolica')) {
                 $validator->errors()->add('tension_sistolica', 'La tensión sistólica debe ser mayor que la diastólica.');
@@ -232,7 +232,7 @@ class HistorialMedicoController extends Controller
                 $validator->errors()->add('tension_sistolica', 'Debe registrar al menos un valor médico.');
             }
 
-            // D17: una tensión sistólica por debajo de la diastólica es imposible
+            // Una tensión sistólica por debajo de la diastólica es imposible
             if ($request->filled('tension_sistolica') && $request->filled('tension_diastolica')
                 && (int) $request->input('tension_sistolica') <= (int) $request->input('tension_diastolica')) {
                 $validator->errors()->add('tension_sistolica', 'La tensión sistólica debe ser mayor que la diastólica.');

@@ -12,7 +12,7 @@
      accesible al teclado y a los lectores de pantalla) y usar una etiqueta propia.
 
      El nombre del archivo elegido lo escribe resources/js/app.js con un listener delegado,
-     nunca con onchange en el HTML: la CSP lo bloquearía (hallazgo S17). --}}
+     nunca con onchange en el HTML: la CSP lo bloquearía. --}}
 <div class="mt-1 flex items-center gap-3" data-campo-archivo>
     <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-md bg-marca-50 text-marca-700 text-sm font-semibold hover:bg-marca-100 transition whitespace-nowrap">
         <x-lucide-upload class="w-4 h-4" />

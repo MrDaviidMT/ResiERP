@@ -11,7 +11,7 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            // Hallazgo A1: 'serve' crea rutas GET y PUT /storage/{path}. No se usan (los PDF
+            // 'serve' crea rutas GET y PUT /storage/{path}. No se usan (los PDF
             // clínicos se sirven por InformeController::downloadPdf, con permiso) y el PUT
             // permitiría subir archivos con una URL firmada
             'serve' => false,
