@@ -9,6 +9,17 @@ x-base: &base
       max-size: 10m
       max-file: "3"
 
+# La aplicación no escribe en su imagen: solo en estas carpetas temporales y en los volúmenes.
+# 82 es www-data en Alpine.
+x-solo-lectura: &solo-lectura
+  read_only: true
+  tmpfs:
+    - /tmp:size=128m
+    - /var/www/html/bootstrap/cache:uid=82,gid=82,mode=0775,size=16m
+    - /var/www/html/storage/framework/cache:uid=82,gid=82,mode=0775,size=32m
+    - /var/www/html/storage/framework/sessions:uid=82,gid=82,mode=0775,size=16m
+    - /var/www/html/storage/framework/views:uid=82,gid=82,mode=0775,size=64m
+
 services:
   nginx:
     # Imagen sin privilegios (no corre como root, escucha en 8080) con los archivos públicos dentro
@@ -37,12 +48,13 @@ services:
     build: .
     image: resierp-app
     container_name: ResidenciaERP_app
-    <<: *base
+    <<: [*base, *solo-lectura]
     mem_limit: 1g
     pids_limit: 200
     volumes:
       - ./.env:/var/www/html/.env:ro
       - residentes_storage:/var/www/html/storage/app/private
+      - app_logs:/var/www/html/storage/logs
     cap_drop:
       - ALL
     depends_on:
@@ -60,13 +72,14 @@ services:
     build: .
     image: resierp-app
     container_name: ResidenciaERP_scheduler
-    <<: *base
+    <<: [*base, *solo-lectura]
     mem_limit: 512m
     pids_limit: 100
     entrypoint: ["php", "artisan", "schedule:work"]
     volumes:
       - ./.env:/var/www/html/.env:ro
       - residentes_storage:/var/www/html/storage/app/private
+      - app_logs:/var/www/html/storage/logs
     cap_drop:
       - ALL
     depends_on:
@@ -80,7 +93,7 @@ services:
     profiles: [setup]
     build: .
     image: resierp-app
-    <<: *base
+    <<: [*base, *solo-lectura]
     restart: "no"
     mem_limit: 512m
     pids_limit: 100
@@ -88,6 +101,7 @@ services:
     command: ["php", "artisan", "db:seed", "--force"]
     volumes:
       - ./.env:/var/www/html/.env:ro
+      - app_logs:/var/www/html/storage/logs
     cap_drop:
       - ALL
     depends_on:
@@ -120,6 +134,14 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+    # Lo justo para que el arranque prepare sus carpetas, lea el secreto y pase al usuario mysql
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
     networks:
       # Red interna: MySQL no es accesible desde fuera ni desde nginx
       - backend
@@ -132,6 +154,7 @@ secrets:
 volumes:
   db_data:
   residentes_storage:
+  app_logs:
 
 networks:
   frontend:

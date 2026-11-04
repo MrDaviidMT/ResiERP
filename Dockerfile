@@ -46,7 +46,8 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction && \
     rm /usr/bin/composer
 
 # Permisos en la imagen (hallazgo S9): el contenedor no necesita arrancar como root para hacer chown
-RUN chown -R www-data:www-data storage bootstrap/cache && \
+RUN mkdir -p storage/app/private storage/logs && \
+    chown -R www-data:www-data storage bootstrap/cache && \
     chmod -R 775 storage bootstrap/cache
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
