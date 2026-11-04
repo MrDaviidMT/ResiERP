@@ -68,7 +68,7 @@ class DatabaseSeeder extends Seeder
         if (blank($valor)) {
             throw new RuntimeException(
                 "Falta {$variable}: sin ella el sembrado crearía usuarios a los que nadie puede acceder. "
-                .'Defínela en el .env antes de ejecutar los seeders.'
+                .'Defínela en .env.seed antes de ejecutar los seeders.'
             );
         }
 

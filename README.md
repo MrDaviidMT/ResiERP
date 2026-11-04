@@ -69,9 +69,12 @@ You need Docker with Compose, and port 80 free.
 git clone https://github.com/MrDaviidMT/ResiERP.git
 cd ResiERP
 cp .env.example .env
+cp .env.seed.example .env.seed
+mkdir -p secrets
+openssl rand -base64 32 > secrets/mysql_root_password
 ```
 
-In `.env`, fill in `DB_PASSWORD`, `DB_ROOT_PASSWORD`, `ADMIN_PASSWORD` and `DEMO_PASSWORD` with values of your own. Then generate the application key and start the stack:
+Fill in `DB_PASSWORD` in `.env`, and `ADMIN_PASSWORD` and `DEMO_PASSWORD` in `.env.seed`, with values of your own. Only the MySQL container receives the root password, and only the one-off `seed` container reads `.env.seed`. Then generate the application key and start the stack:
 
 ```bash
 KEY=$(docker compose run --rm --no-deps --entrypoint php app artisan key:generate --show | tail -1)
@@ -83,10 +86,10 @@ Migrations run when the containers start. Once the site responds at <http://loca
 
 ```bash
 # Permissions, one user per job and sample residents
-docker compose exec app php artisan db:seed
+docker compose run --rm seed
 
 # Optional: invented data for every screen. It refuses to run in production
-docker compose exec app php artisan db:seed --class=DemoSeeder
+docker compose run --rm seed php artisan db:seed --class=DemoSeeder
 ```
 
 Sign in as `admin@residencia.test` with `ADMIN_PASSWORD`, or as one user per job with `DEMO_PASSWORD`, for example `enfermero@residencia.test` or `director@residencia.test`.

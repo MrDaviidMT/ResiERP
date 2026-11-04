@@ -64,6 +64,24 @@ services:
     networks:
       - backend
 
+  # Sembrado inicial, bajo demanda. Es el único contenedor que recibe .env.seed, y desaparece al terminar
+  seed:
+    profiles: [setup]
+    build: .
+    env_file: .env.seed
+    command: ["php", "artisan", "db:seed", "--force"]
+    volumes:
+      - ./.env:/var/www/html/.env:ro
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - backend
+
   mysql:
     image: mysql:8.4.13
     container_name: ResidenciaERP_mysql
@@ -72,13 +90,16 @@ services:
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+    secrets:
+      - mysql_root_password
     volumes:
       - db_data:/var/lib/mysql
       # Privilegios mínimos para el usuario de la aplicación (hallazgo S12)
       - ./docker/mysql-privilegios.sh:/docker-entrypoint-initdb.d/10-privilegios.sh:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      # Sin credenciales: ping solo comprueba que el servidor responde
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -88,6 +109,11 @@ services:
     networks:
       # Red interna: MySQL no es accesible desde fuera ni desde nginx
       - backend
+
+# Solo MySQL la recibe: la aplicación se conecta con su usuario de privilegios mínimos
+secrets:
+  mysql_root_password:
+    file: ./secrets/mysql_root_password
 
 volumes:
   db_data:
