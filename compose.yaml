@@ -1,3 +1,14 @@
+# Común a todos los servicios: reinicio, sin escalada de privilegios y logs con tope de tamaño
+x-base: &base
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
+
 services:
   nginx:
     # Imagen sin privilegios (no corre como root, escucha en 8080) con los archivos públicos dentro
@@ -5,7 +16,9 @@ services:
       context: .
       target: web
     container_name: ResidenciaERP_nginx
-    restart: unless-stopped
+    <<: *base
+    mem_limit: 128m
+    pids_limit: 100
     ports:
       - "80:8080"
     read_only: true
@@ -13,8 +26,6 @@ services:
       - /tmp
       - /var/cache/nginx
       - /var/run
-    security_opt:
-      - no-new-privileges:true
     cap_drop:
       - ALL
     depends_on:
@@ -24,14 +35,14 @@ services:
 
   app:
     build: .
+    image: resierp-app
     container_name: ResidenciaERP_app
-    restart: unless-stopped
-    working_dir: /var/www/html
+    <<: *base
+    mem_limit: 1g
+    pids_limit: 200
     volumes:
       - ./.env:/var/www/html/.env:ro
       - residentes_storage:/var/www/html/storage/app/private
-    security_opt:
-      - no-new-privileges:true
     cap_drop:
       - ALL
     depends_on:
@@ -47,15 +58,15 @@ services:
   # schedule:work se queda en primer plano y lanza lo que toque cada minuto.
   scheduler:
     build: .
+    image: resierp-app
     container_name: ResidenciaERP_scheduler
-    restart: unless-stopped
-    working_dir: /var/www/html
+    <<: *base
+    mem_limit: 512m
+    pids_limit: 100
     entrypoint: ["php", "artisan", "schedule:work"]
     volumes:
       - ./.env:/var/www/html/.env:ro
       - residentes_storage:/var/www/html/storage/app/private
-    security_opt:
-      - no-new-privileges:true
     cap_drop:
       - ALL
     depends_on:
@@ -68,12 +79,15 @@ services:
   seed:
     profiles: [setup]
     build: .
+    image: resierp-app
+    <<: *base
+    restart: "no"
+    mem_limit: 512m
+    pids_limit: 100
     env_file: .env.seed
     command: ["php", "artisan", "db:seed", "--force"]
     volumes:
       - ./.env:/var/www/html/.env:ro
-    security_opt:
-      - no-new-privileges:true
     cap_drop:
       - ALL
     depends_on:
@@ -85,7 +99,9 @@ services:
   mysql:
     image: mysql:8.4.13
     container_name: ResidenciaERP_mysql
-    restart: unless-stopped
+    <<: *base
+    mem_limit: 1g
+    pids_limit: 300
     environment:
       MYSQL_DATABASE: ${DB_DATABASE}
       MYSQL_USER: ${DB_USERNAME}
@@ -104,8 +120,6 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
-    security_opt:
-      - no-new-privileges:true
     networks:
       # Red interna: MySQL no es accesible desde fuera ni desde nginx
       - backend
@@ -117,13 +131,9 @@ secrets:
 
 volumes:
   db_data:
-    driver: local
   residentes_storage:
-    driver: local
 
 networks:
   frontend:
-    driver: bridge
   backend:
-    driver: bridge
     internal: true
