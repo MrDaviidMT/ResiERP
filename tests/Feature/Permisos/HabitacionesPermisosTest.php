@@ -23,6 +23,19 @@ class HabitacionesPermisosTest extends TestCase
         $this->actingAs($auxiliar)->put(route('habitaciones.update', $habitacion), ['observaciones' => 'x'])->assertForbidden();
     }
 
+    public function test_only_management_can_delete_a_room(): void
+    {
+        $habitacion = Habitacion::factory()->create();
+
+        $this->actingAs(User::factory()->role(Role::Auxiliar)->create())
+            ->delete(route('habitaciones.destroy', $habitacion))->assertForbidden();
+        $this->assertModelExists($habitacion);
+
+        $this->actingAs(User::factory()->role(Role::Director)->create())
+            ->delete(route('habitaciones.destroy', $habitacion))->assertRedirect(route('habitaciones.index'));
+        $this->assertModelMissing($habitacion);
+    }
+
     public function test_maintenance_can_still_toggle_maintenance_mode(): void
     {
         $mantenimiento = User::factory()->role(Role::Mantenimiento)->create();
