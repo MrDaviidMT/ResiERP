@@ -27,6 +27,18 @@ class CalidadDatosTest extends TestCase
         ], $extra);
     }
 
+    public function test_a_resident_cannot_be_admitted_to_a_full_room(): void
+    {
+        $habitacion = Habitacion::factory()->create(['tipo' => 'individual']);
+        Residente::factory()->create(['habitacion_id' => $habitacion->id]);
+
+        $this->actingAs(User::factory()->role(Role::Director)->create())
+            ->post(route('residentes.store'), $this->alta(['habitacion_id' => $habitacion->id]))
+            ->assertSessionHasErrors('habitacion_id');
+
+        $this->assertSame(1, $habitacion->residentes()->count());
+    }
+
     public function test_a_resident_cannot_be_admitted_with_an_invalid_document(): void
     {
         $this->actingAs(User::factory()->role(Role::Director)->create())
