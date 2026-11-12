@@ -70,6 +70,15 @@ class CalidadDatosTest extends TestCase
         Residente::factory()->create(['dni' => '12345678Z']);
     }
 
+    public function test_the_database_rejects_a_duplicate_relative_document(): void
+    {
+        $datos = ['nombre' => 'Ana', 'apellidos' => 'Pérez', 'dni' => '12345678Z', 'telefono' => '600000000'];
+        Familiar::create($datos);
+
+        $this->expectException(UniqueConstraintViolationException::class);
+        Familiar::create($datos);
+    }
+
     public function test_a_relative_cannot_be_created_with_an_invalid_document(): void
     {
         $residente = Residente::factory()->create();

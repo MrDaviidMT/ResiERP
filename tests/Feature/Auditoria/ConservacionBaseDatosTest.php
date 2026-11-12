@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 // Aunque se salte la aplicación, la base de datos no borra historial en cascada
@@ -50,6 +51,15 @@ class ConservacionBaseDatosTest extends TestCase
         $autor = User::factory()->create();
         Log::create(['user_id' => $autor->id, 'loggable_type' => User::class, 'loggable_id' => $autor->id, 'action' => 'updated']);
         $this->assertBorradoBloqueado('users', $autor->id);
+    }
+
+    // Declarado en el esquema, no heredado del comportamiento por defecto de cada motor
+    public function test_author_foreign_keys_restrict_deletion_explicitly(): void
+    {
+        foreach (['actividades', 'cuidados_diarios', 'informes'] as $tabla) {
+            $clave = collect(Schema::getForeignKeys($tabla))->firstWhere('columns', ['user_id']);
+            $this->assertSame('restrict', strtolower($clave['on_delete']), "{$tabla}.user_id");
+        }
     }
 
     public function test_a_room_with_incident_history_cannot_be_deleted(): void
