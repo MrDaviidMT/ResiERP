@@ -1,5 +1,7 @@
 # ResiERP
 
+[![CI](https://github.com/MrDaviidMT/ResiERP/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MrDaviidMT/ResiERP/actions/workflows/ci.yml)
+
 Web ERP for care homes: residents, clinical records, medication, incidents, staff time tracking and visits, with nine staff roles that each have their own permissions.
 
 Because it handles health data about vulnerable people, the focus is on security and traceability: granular permissions, clinical records that are voided rather than deleted, and audit logs that include reads of sensitive data.
