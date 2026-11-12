@@ -10,6 +10,7 @@ use App\Models\Habitacion;
 use App\Models\Incidencia;
 use App\Models\Residente;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -58,6 +59,15 @@ class CalidadDatosTest extends TestCase
         $this->actingAs($director)->post(route('residentes.store'), $this->alta(['dni' => '12345678Z', 'nombre' => 'Otra']))
             ->assertSessionHasErrors('dni');
         $this->assertSame(1, Residente::count());
+    }
+
+    // Si dos altas pasan la validación a la vez, la base de datos frena la segunda
+    public function test_the_database_rejects_a_duplicate_document(): void
+    {
+        Residente::factory()->create(['dni' => '12345678Z']);
+
+        $this->expectException(UniqueConstraintViolationException::class);
+        Residente::factory()->create(['dni' => '12345678Z']);
     }
 
     public function test_a_relative_cannot_be_created_with_an_invalid_document(): void
