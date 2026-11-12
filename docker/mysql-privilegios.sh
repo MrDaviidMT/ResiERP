@@ -2,10 +2,10 @@
 # Privilegios mínimos para el usuario de la aplicación.
 # Se ejecuta una sola vez, al inicializar la base de datos.
 #
-# La imagen de MySQL concede ALL PRIVILEGES al usuario de MYSQL_USER sobre su base de datos,
-# lo que incluye vaciar la auditoría. Aquí se recorta a lo que la aplicación necesita, y se le
-# quita la posibilidad de MODIFICAR registros de auditoría: una vez escritos no se alteran.
+# La imagen de MySQL concede ALL PRIVILEGES al usuario de MYSQL_USER sobre su base de datos.
+# Aquí se recorta a lo que la aplicación y sus migraciones necesitan.
 #
+# Que la auditoría no se modifique no se puede imponer desde aquí (ver abajo): lo impide el modelo.
 # Se conserva el permiso de borrado porque la política de conservación elimina la auditoría vencida.
 set -eu
 
