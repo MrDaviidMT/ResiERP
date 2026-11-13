@@ -3,8 +3,10 @@
 namespace Tests\Feature\Residentes;
 
 use App\Enums\Role;
+use App\Models\Alergia;
 use App\Models\CuidadoDiario;
 use App\Models\Diagnostico;
+use App\Models\Log;
 use App\Models\Medicacion;
 use App\Models\Residente;
 use App\Models\User;
@@ -73,5 +75,38 @@ class AutorRegistroClinicoTest extends TestCase
 
         $this->actingAs($autora)->get(route('residentes.historial', $residente))->assertSee('Editar diagnóstico');
         $this->actingAs($companera)->get(route('residentes.historial', $residente))->assertDontSee('Editar diagnóstico');
+    }
+
+    // La restricción al autor es solo para corregir el contenido. Marcar una condición como activa o
+    // resuelta es seguimiento clínico que hace quien atiende, no quien la escribió, y queda auditado.
+    public function test_a_colleague_may_toggle_the_status_of_a_record_she_did_not_write(): void
+    {
+        $autora = User::factory()->role(Role::Enfermero)->create();
+        $companera = User::factory()->role(Role::Enfermero)->create();
+        $residente = Residente::factory()->create();
+        $this->actingAs($autora)->post(route('diagnosticos.store', $residente), $this->diagnostico());
+        $diagnostico = Diagnostico::sole();
+        $this->assertTrue((bool) $diagnostico->activo);
+
+        // Corregir el contenido sigue vedado a quien no es la autora
+        $this->actingAs($companera)->put(route('diagnosticos.update', $diagnostico), $this->diagnostico())->assertForbidden();
+
+        // Cambiar el estado sí se permite, y el cambio se audita a nombre de quien lo hace
+        $this->actingAs($companera)->post(route('diagnosticos.toggle', $diagnostico))->assertSessionHas('success');
+        $this->assertFalse((bool) $diagnostico->fresh()->activo);
+        $cambio = Log::where('action', 'updated')->where('loggable_id', $diagnostico->id)->latest('id')->first();
+        $this->assertSame($companera->id, $cambio->user_id);
+    }
+
+    public function test_a_colleague_may_toggle_an_allergy_she_did_not_write(): void
+    {
+        $autora = User::factory()->role(Role::Enfermero)->create();
+        $companera = User::factory()->role(Role::Enfermero)->create();
+        $residente = Residente::factory()->create();
+        $this->actingAs($autora)->post(route('alergias.store', $residente), ['alergeno' => 'Penicilina', 'severidad' => 'grave']);
+        $alergia = Alergia::sole();
+
+        $this->actingAs($companera)->post(route('alergias.toggle', $alergia))->assertSessionHas('success');
+        $this->assertNotSame((bool) $alergia->activa, (bool) $alergia->fresh()->activa);
     }
 }
